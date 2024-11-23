@@ -80,7 +80,7 @@ const Calendar: React.FC<CalendarProps> = () => {
 
             <div className="grid grid-cols-7 gap-4 mt-6">
                 {leadingEmptyDays.map((_, index) => (
-                    <div key={index} className=""></div>
+                    <div key={index} className="div"></div>
                 ))}
                 {daysInMonth.map((day) => {
                     const fullDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
