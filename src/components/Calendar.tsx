@@ -4,14 +4,22 @@ type CalendarProps = {};
 
 type SelectedDate = Date;
 
+type Event = {
+    date: Date;
+    title: string;
+};
+
 const Calendar: React.FC<CalendarProps> = () => {
     const today = new Date();
 
     const [currentDate, setCurrentDate] = useState<Date>(today);
     const [selectedDates, setSelectedDates] = useState<SelectedDate[]>([]);
+    const [events, setEvents] = useState<Event[]>([]);
+    const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+    const [modalDate, setModalDate] = useState<Date | null>(null);
+    const [eventTitle, setEventTitle] = useState<string>("");
 
     const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-
     const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
 
     const daysInMonth: number[] = [];
@@ -30,29 +38,28 @@ const Calendar: React.FC<CalendarProps> = () => {
 
     const toggleDateSelection = (day: number) => {
         const fullDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
-        const isSelected = selectedDates.some(
-            (date) => date.getTime() === fullDate.getTime()
-        );
+        setModalDate(fullDate);
+        setIsModalOpen(true);
+    };
 
-        if (isSelected) {
-            setSelectedDates(
-                selectedDates.filter((date) => date.getTime() !== fullDate.getTime())
-            );
-        } else {
-            setSelectedDates([...selectedDates, fullDate]);
+    const handleAddEvent = () => {
+        if (modalDate && eventTitle.trim()) {
+            setEvents([...events, { date: modalDate, title: eventTitle.trim() }]);
+            setEventTitle("");
+            setIsModalOpen(false);
         }
     };
 
     return (
-        <div className="w-full max-w-4xl mx-auto p-6 my-40 border border-white rounded-lg shadow-lg">
-            <div className="flex justify-between items-center mb-8 text-white">
+        <div className="w-full max-w-4xl my-40 border border-white mx-auto p-6 bg-black rounded-lg shadow-lg">
+            <div className="flex justify-between items-center mb-4 text-white">
                 <button
                     onClick={() => handleMonthChange(-1)}
                     className="px-3 py-1 bg-gray-700 rounded hover:bg-gray-600"
                 >
                     &#8249;
                 </button>
-                <h2 className="text-2xl font-bold capitalize">
+                <h2 className="text-3xl font-bold capitalize">
                     {currentDate.toLocaleString("eng", { month: "long" })} {currentDate.getFullYear()}
                 </h2>
                 <button
@@ -65,7 +72,7 @@ const Calendar: React.FC<CalendarProps> = () => {
 
             <div className="grid grid-cols-7 gap-4 text-center text-2xl font-medium text-gray-400">
                 {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
-                    <div key={day} className="cursor-pointer hover:text-white transition-all">
+                    <div key={day} className=" hover:text-white transition-all cursor-pointer">
                         {day}
                     </div>
                 ))}
@@ -81,18 +88,16 @@ const Calendar: React.FC<CalendarProps> = () => {
                         today.getDate() === day &&
                         today.getMonth() === currentDate.getMonth() &&
                         today.getFullYear() === currentDate.getFullYear();
-                    const isSelected = selectedDates.some(
-                        (date) => date.getTime() === fullDate.getTime()
-                    );
+                    const hasEvent = events.some((event) => event.date.getTime() === fullDate.getTime());
 
                     return (
                         <div
                             key={day}
                             onClick={() => toggleDateSelection(day)}
-                            className={`h-16 flex items-center justify-center rounded-lg text-2xl cursor-pointer border ${isToday
+                            className={`h-14 flex items-center justify-center rounded-lg cursor-pointer border ${isToday
                                     ? "bg-blue-500 text-white border-blue-700"
-                                    : isSelected
-                                        ? "bg-green-500 text-white border-green-700"
+                                    : hasEvent
+                                        ? "bg-yellow-500 text-white border-yellow-700"
                                         : "bg-gray-800 text-gray-200 border-gray-600 hover:bg-gray-600"
                                 }`}
                         >
@@ -102,17 +107,45 @@ const Calendar: React.FC<CalendarProps> = () => {
                 })}
             </div>
 
-            {selectedDates.length > 0 && (
-                <div className="mt-4 text-white">
-                    <h3 className="text-2xl font-bold">Tanlangan kunlar:</h3>
-                    <ul className="flex flex-wrap gap-6">
-                        {selectedDates.map((date, index) => (
-                            <li key={index} className="text-2xl m-4">
-                                {date.toLocaleDateString("eng", {
-                                    day: "2-digit",
-                                    month: "long",
-                                    year: "numeric",
-                                })}
+            {isModalOpen && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                    <div className="bg-transparent border border-white text-white p-6 rounded shadow-lg max-w-xl shadow-white w-full">
+                        <h3 className="text-lg font-bold mb-4">Add New Event</h3>
+                        <label className="block mb-2">
+                            Title
+                            <input
+                                type="text"
+                                value={eventTitle}
+                                onChange={(e) => setEventTitle(e.target.value)}
+                                className="mt-1 block w-full p-3 border-gray-300 rounded-md shadow-md focus:ring focus:ring-opacity-50"
+                            />
+                        </label>
+                        <div className="mb-4 text-xl">
+                            <strong>Date:</strong> {modalDate?.toLocaleDateString("uz-UZ")}
+                        </div>
+                        <button
+                            onClick={handleAddEvent}
+                            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                        >
+                            Add Event
+                        </button>
+                        <button
+                            onClick={() => setIsModalOpen(false)}
+                            className="ml-2 px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {events.length > 0 && (
+                <div className="mt-4 text-2xl text-white">
+                    <h3 className="font-bold">Events:</h3>
+                    <ul>
+                        {events.map((event, index) => (
+                            <li key={index}>
+                                <strong>{event.title}</strong> - {event.date.toLocaleDateString("uz-UZ")}
                             </li>
                         ))}
                     </ul>
