@@ -2,8 +2,6 @@ import React, { useState } from "react";
 
 type CalendarProps = {};
 
-type SelectedDate = Date;
-
 type Event = {
     date: Date;
     title: string;
@@ -13,7 +11,6 @@ const Calendar: React.FC<CalendarProps> = () => {
     const today = new Date();
 
     const [currentDate, setCurrentDate] = useState<Date>(today);
-    const [selectedDates, setSelectedDates] = useState<SelectedDate[]>([]);
     const [events, setEvents] = useState<Event[]>([]);
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [modalDate, setModalDate] = useState<Date | null>(null);
@@ -95,10 +92,10 @@ const Calendar: React.FC<CalendarProps> = () => {
                             key={day}
                             onClick={() => toggleDateSelection(day)}
                             className={`h-14 flex items-center justify-center rounded-lg cursor-pointer border ${isToday
-                                    ? "bg-blue-500 text-white border-blue-700"
-                                    : hasEvent
-                                        ? "bg-yellow-500 text-white border-yellow-700"
-                                        : "bg-gray-800 text-gray-200 border-gray-600 hover:bg-gray-600"
+                                ? "bg-blue-500 text-white border-blue-700"
+                                : hasEvent
+                                    ? "bg-yellow-500 text-white border-yellow-700"
+                                    : "bg-gray-800 text-gray-200 border-gray-600 hover:bg-gray-600"
                                 }`}
                         >
                             {day}
@@ -117,7 +114,7 @@ const Calendar: React.FC<CalendarProps> = () => {
                                 type="text"
                                 value={eventTitle}
                                 onChange={(e) => setEventTitle(e.target.value)}
-                                className="mt-1 block w-full p-3 border-gray-300 rounded-md shadow-md focus:ring focus:ring-opacity-50"
+                                className="mt-1 block w-full p-3 text-black border-gray-300 rounded-md shadow-md focus:ring focus:ring-opacity-50"
                             />
                         </label>
                         <div className="mb-4 text-xl">
